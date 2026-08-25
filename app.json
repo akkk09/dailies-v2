@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "dailies-v2",
-    "slug": "dailies-v2",
+    "slug": "dailies",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,6 +19,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "19e21805-e7d7-4693-9f1b-e031d30a1da9"
+      }
+    },
+    "owner": "k8ykl1s-team"
   }
 }
