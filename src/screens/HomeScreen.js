@@ -9,9 +9,10 @@ import { loadHabits, saveHabits, loadPoints, savePoints, loadTheme, saveTheme, l
 import HabitItem from '../components/HabitItem';
 import HabitModal from '../components/HabitModal';
 import ThemeModal from '../components/ThemeModal';
-import Mascot from '../components/Mascot';
+import RiveMascot from '../components/RiveMascot';
 import Heatmap from '../components/Heatmap';
 import SettingsModal from '../components/SettingsModal';
+import SkiaProgressRing from '../components/SkiaProgressRing';
 import { themes } from '../constants/themes';
 
 const { width } = Dimensions.get('window');
@@ -151,6 +152,9 @@ const HomeScreen = () => {
     setHabitToEdit(null);
   };
 
+  const todayCompletedCount = habits.filter(h => isCompletedToday(h.completedDates)).length;
+  const progress = habits.length > 0 ? todayCompletedCount / habits.length : 0;
+
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTop}>
@@ -158,8 +162,9 @@ const HomeScreen = () => {
           <Text style={[styles.headerTitle, { color: currentTheme.primary }]}>My Dailies 💖</Text>
           <Text style={[styles.headerDate, { color: currentTheme.secondary }]}>{format(new Date(), 'EEEE, MMMM do')}</Text>
         </View>
-        <View style={{alignItems: 'flex-end'}}>
-          <View style={{flexDirection: 'row', gap: 15, marginBottom: 8}}>
+        <View style={{alignItems: 'flex-end', justifyContent: 'center'}}>
+          <SkiaProgressRing progress={progress} theme={currentTheme} />
+          <View style={{flexDirection: 'row', gap: 15, marginBottom: 8, marginTop: 8}}>
             <TouchableOpacity onPress={() => setSettingsModalVisible(true)}>
               <Bell color={currentTheme.primary} size={28} />
             </TouchableOpacity>
@@ -234,7 +239,7 @@ const HomeScreen = () => {
           setTotalPoints={(pts) => { setTotalPoints(pts); savePoints(pts); }}
         />
 
-        <Mascot ref={mascotRef} />
+        <RiveMascot ref={mascotRef} />
       </View>
     </SafeAreaView>
   );

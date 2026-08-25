@@ -25,6 +25,12 @@
         "projectId": "19e21805-e7d7-4693-9f1b-e031d30a1da9"
       }
     },
-    "owner": "k8ykl1s-team"
+    "owner": "k8ykl1s-team",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/19e21805-e7d7-4693-9f1b-e031d30a1da9"
+    }
   }
 }
