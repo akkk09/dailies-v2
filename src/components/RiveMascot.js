@@ -1,19 +1,22 @@
-import React, { forwardRef, useImperativeHandle, useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import Rive, { Alignment, Fit } from 'rive-react-native';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import { View, StyleSheet, Text, Platform } from 'react-native';
+
+let Rive, Alignment, Fit;
+if (Platform.OS !== 'web') {
+  const RiveModule = require('rive-react-native');
+  Rive = RiveModule.default;
+  Alignment = RiveModule.Alignment;
+  Fit = RiveModule.Fit;
+}
 
 const RiveMascot = forwardRef((props, ref) => {
   const riveRef = useRef(null);
   
-  // NOTE: You must provide a valid Rive file URL or asset bundle.
-  // We're using a placeholder URL here. You should download a mascot .riv 
-  // from the Rive community and place it in your assets folder, then use resourceName="mascot"
   const mascotUrl = 'https://public.rive.app/community/runtime-files/2195-4346-avatar-pack-use-case.riv';
 
   useImperativeHandle(ref, () => ({
     trigger: () => {
-      // Trigger celebrating state in the state machine (if it exists)
-      if (riveRef.current) {
+      if (riveRef.current && Platform.OS !== 'web') {
         try {
           riveRef.current.fireState('State Machine 1', 'celebrate');
         } catch (e) {
@@ -23,6 +26,14 @@ const RiveMascot = forwardRef((props, ref) => {
     }
   }));
 
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.container}>
+        <Text style={{ fontSize: 60 }}>🐰</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Rive
@@ -30,8 +41,8 @@ const RiveMascot = forwardRef((props, ref) => {
         url={mascotUrl}
         artboardName="Avatar 1"
         stateMachineName="State Machine 1"
-        alignment={Alignment.Center}
-        fit={Fit.Contain}
+        alignment={Alignment?.Center}
+        fit={Fit?.Contain}
         style={styles.riveAnimation}
       />
     </View>
