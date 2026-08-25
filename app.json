@@ -18,7 +18,13 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "Dailies",
+      "shortName": "Dailies",
+      "themeColor": "#FF69B4",
+      "backgroundColor": "#FFFFFF",
+      "display": "standalone",
+      "bundler": "metro"
     },
     "extra": {
       "eas": {

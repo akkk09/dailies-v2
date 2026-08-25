@@ -9,10 +9,10 @@ import { loadHabits, saveHabits, loadPoints, savePoints, loadTheme, saveTheme, l
 import HabitItem from '../components/HabitItem';
 import HabitModal from '../components/HabitModal';
 import ThemeModal from '../components/ThemeModal';
-import RiveMascot from '../components/RiveMascot';
+import LottieMascot from '../components/LottieMascot';
 import Heatmap from '../components/Heatmap';
 import SettingsModal from '../components/SettingsModal';
-import SkiaProgressRing from '../components/SkiaProgressRing';
+import SvgProgressRing from '../components/SvgProgressRing';
 import { themes } from '../constants/themes';
 
 const { width } = Dimensions.get('window');
@@ -163,7 +163,7 @@ const HomeScreen = () => {
           <Text style={[styles.headerDate, { color: currentTheme.secondary }]}>{format(new Date(), 'EEEE, MMMM do')}</Text>
         </View>
         <View style={{alignItems: 'flex-end', justifyContent: 'center'}}>
-          <SkiaProgressRing progress={progress} theme={currentTheme} />
+          <SvgProgressRing progress={progress} theme={currentTheme} />
           <View style={{flexDirection: 'row', gap: 15, marginBottom: 8, marginTop: 8}}>
             <TouchableOpacity onPress={() => setSettingsModalVisible(true)}>
               <Bell color={currentTheme.primary} size={28} />
@@ -239,7 +239,7 @@ const HomeScreen = () => {
           setTotalPoints={(pts) => { setTotalPoints(pts); savePoints(pts); }}
         />
 
-        <RiveMascot ref={mascotRef} />
+        <LottieMascot ref={mascotRef} />
       </View>
     </SafeAreaView>
   );
