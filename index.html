@@ -84,12 +84,39 @@
         <!-- 2. Pomodoro View -->
         <div id="pomo-view" class="tab-view">
             <div class="pomodoro-section">
-                <div class="pomo-tabs">
-                    <button id="tab-focus" class="pomo-tab active">Focus (25m)</button>
-                    <button id="tab-break" class="pomo-tab">Break (5m)</button>
+                
+                <div class="pomo-mode-selector" style="display: flex; gap: 8px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn pomo-preset-btn active" data-focus="25" data-break="5" style="flex: 1; padding: 5px 10px; font-size: 0.8rem;">Classic</button>
+                    <button class="btn pomo-preset-btn" data-focus="15" data-break="5" style="flex: 1; padding: 5px 10px; font-size: 0.8rem;">Quick</button>
+                    <button class="btn pomo-preset-btn" data-focus="50" data-break="10" style="flex: 1; padding: 5px 10px; font-size: 0.8rem;">Deep</button>
                 </div>
+
+                <div class="pomo-customizer" style="display: flex; justify-content: space-around; margin-bottom: 15px; background: var(--bg-color); padding: 15px; border-radius: 15px;">
+                    <div style="text-align: center;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: var(--text-main);">Focus (min)</label>
+                        <input type="number" id="custom-focus-time" value="25" min="1" max="120" style="width: 70px; text-align: center; border-radius: 8px; border: 2px solid var(--border-color); padding: 5px; font-weight: bold; background: var(--card-bg); color: var(--text-main);">
+                    </div>
+                    <div style="text-align: center;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: var(--text-main);">Break (min)</label>
+                        <input type="number" id="custom-break-time" value="5" min="1" max="30" style="width: 70px; text-align: center; border-radius: 8px; border: 2px solid var(--border-color); padding: 5px; font-weight: bold; background: var(--card-bg); color: var(--text-main);">
+                    </div>
+                </div>
+
+                <div class="pomo-tabs">
+                    <button id="tab-focus" class="pomo-tab active">Focus</button>
+                    <button id="tab-break" class="pomo-tab">Break</button>
+                </div>
+                
                 <div class="pomo-display" id="pomo-display">25:00</div>
-                <div class="pomo-controls">
+                
+                <!-- Background Ambiance Toggle -->
+                <div class="ambience-controls" style="margin-top: 15px; text-align: center;">
+                    <button id="ambience-toggle-btn" class="btn" style="background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 20px; padding: 8px 15px; width: 100%; font-weight: bold;">🎵 Lofi Beats (Off)</button>
+                    <!-- A short lofi beat mp3 from free assets -->
+                    <audio id="ambience-audio" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"></audio>
+                </div>
+
+                <div class="pomo-controls" style="margin-top: 20px;">
                     <button id="pomo-play" class="pomo-btn play">▶ Start</button>
                     <button id="pomo-pause" class="pomo-btn pause" style="display: none;">⏸ Pause</button>
                     <button id="pomo-reset" class="pomo-btn reset">🔄 Reset</button>
@@ -280,10 +307,14 @@
     <div class="modal" id="stats-modal">
         <div class="modal-content">
             <h2>Focus Stats 📊</h2>
-            <p>Your focus journey and insights!</p>
-            <div id="stats-container" style="display: flex; flex-direction: column; gap: 12px; width: 100%;"></div>
-            <div class="modal-actions">
-                <button class="save-btn" id="stats-close-btn">Close</button>
+            <div class="stats-tabs" style="display: flex; gap: 5px; margin-bottom: 15px; justify-content: center; background: var(--bg-color); padding: 5px; border-radius: 12px; width: 100%;">
+                <button class="btn stats-tab-btn active" data-target="stats-overview" style="flex: 1; padding: 8px 5px; font-size: 0.8rem;">Overview</button>
+                <button class="btn stats-tab-btn" data-target="stats-insights" style="flex: 1; padding: 8px 5px; font-size: 0.8rem;">Insights</button>
+                <button class="btn stats-tab-btn" data-target="stats-settings" style="flex: 1; padding: 8px 5px; font-size: 0.8rem;">Settings</button>
+            </div>
+            <div id="stats-container" style="display: flex; flex-direction: column; width: 100%;"></div>
+            <div class="modal-actions" style="margin-top: 15px;">
+                <button class="save-btn" id="stats-close-btn" style="width: 100%;">Close</button>
             </div>
         </div>
     </div>

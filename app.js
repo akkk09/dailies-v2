@@ -780,7 +780,9 @@ function pausePomo() {
 
 function resetPomo() {
     pausePomo();
-    pomo.timeLeft = pomo.mode === 'focus' ? 25 * 60 : 5 * 60;
+    const customFocus = parseInt(document.getElementById('custom-focus-time')?.value) || 25;
+    const customBreak = parseInt(document.getElementById('custom-break-time')?.value) || 5;
+    pomo.timeLeft = pomo.mode === 'focus' ? customFocus * 60 : customBreak * 60;
     updatePomoDisplay();
 }
 
@@ -896,7 +898,7 @@ function openHistoryModal(dateStr, historyData) {
     }
 }
 
-// 18. renderStatsModal() - ENHANCED
+// 18. renderStatsModal() - ENHANCED TABBED VERSION
 function renderStatsModal() {
     if (!DOM.statsContainer) return;
     
@@ -907,12 +909,10 @@ function renderStatsModal() {
     const today = new Date(state.today + 'T12:00:00');
     let weekTasks = 0;
     let weekCompleted = 0;
-    const weekDays = [];
     for(let i=0; i<7; i++) {
         const d = new Date(today);
         d.setDate(today.getDate() - i);
         const dateStr = getLocalDate(d);
-        weekDays.push(dateStr);
         const dayData = state.history[dateStr];
         if (dayData && !dayData.frozen && dayData.habits) {
             weekTasks += dayData.habits.length;
@@ -937,7 +937,6 @@ function renderStatsModal() {
     
     let bestDay = 'N/A', worstDay = 'N/A';
     let bestRate = -1, worstRate = 2;
-    
     for (let i=0; i<7; i++) {
         if (dayStats[i].length > 0) {
             const avg = dayStats[i].reduce((a,b)=>a+b,0) / dayStats[i].length;
@@ -949,71 +948,97 @@ function renderStatsModal() {
     const totalDistractions = Object.values(state.distractions).reduce((a, b) => a + b, 0) || 1;
     
     DOM.statsContainer.innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+        <div id="stats-overview" class="stats-tab-content active" style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="stat-card" style="padding: 15px 10px;">
+                    <h3>Total Focus</h3>
+                    <div class="stat-value" style="font-size: 1.4rem;">${totalHours}h ${totalMins}m</div>
+                </div>
+                <div class="stat-card" style="padding: 15px 10px;">
+                    <h3>Sessions</h3>
+                    <div class="stat-value" style="font-size: 1.4rem;">${state.focusSessions}</div>
+                </div>
+            </div>
+            
             <div class="stat-card">
-                <h3>Total Focus</h3>
-                <div class="stat-value">${totalHours}h ${totalMins}m</div>
+                <h3>Last 7 Days</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <div>
+                        <p style="margin:0; font-size: 0.9rem;">Tasks: ${weekCompleted}/${weekTasks}</p>
+                    </div>
+                    <div class="stat-value" style="font-size: 1.8rem;">${weekRate}%</div>
+                </div>
             </div>
+        </div>
+
+        <div id="stats-insights" class="stats-tab-content" style="display: none; flex-direction: column; gap: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="stat-card" style="padding: 12px 5px;">
+                    <h3>Best Day</h3>
+                    <div class="stat-value" style="font-size: 1.1rem; color: var(--success-dark);">${bestDay}</div>
+                </div>
+                <div class="stat-card" style="padding: 12px 5px;">
+                    <h3>Needs Work</h3>
+                    <div class="stat-value" style="font-size: 1.1rem; color: #ff6b6b;">${worstDay}</div>
+                </div>
+            </div>
+            
             <div class="stat-card">
-                <h3>Sessions</h3>
-                <div class="stat-value">${state.focusSessions}</div>
+                <h3 style="margin-bottom: 10px;">Distractions</h3>
+                <div class="stat-row" style="margin-bottom: 5px;">
+                    <span style="font-size: 0.8rem;">📱 Texting (${state.distractions.texting})</span>
+                    <div class="stat-bar-bg" style="height: 6px;"><div class="stat-bar-fill" style="width: ${(state.distractions.texting / totalDistractions) * 100}%"></div></div>
+                </div>
+                <div class="stat-row" style="margin-bottom: 5px;">
+                    <span style="font-size: 0.8rem;">📺 Watching (${state.distractions.watching})</span>
+                    <div class="stat-bar-bg" style="height: 6px;"><div class="stat-bar-fill" style="width: ${(state.distractions.watching / totalDistractions) * 100}%"></div></div>
+                </div>
+                <div class="stat-row" style="margin-bottom: 5px;">
+                    <span style="font-size: 0.8rem;">📚 Studying (${state.distractions.studying})</span>
+                    <div class="stat-bar-bg" style="height: 6px;"><div class="stat-bar-fill" style="width: ${(state.distractions.studying / totalDistractions) * 100}%"></div></div>
+                </div>
+                <div class="stat-row">
+                    <span style="font-size: 0.8rem;">❓ Other (${state.distractions.other})</span>
+                    <div class="stat-bar-bg" style="height: 6px;"><div class="stat-bar-fill" style="width: ${(state.distractions.other / totalDistractions) * 100}%"></div></div>
+                </div>
             </div>
         </div>
-        
-        <div class="stat-card" style="margin-bottom: 20px;">
-            <h3>Last 7 Days</h3>
-            <p>Tasks completed: ${weekCompleted}/${weekTasks}</p>
-            <p>Completion rate: ${weekRate}%</p>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+
+        <div id="stats-settings" class="stats-tab-content" style="display: none; flex-direction: column; gap: 10px;">
             <div class="stat-card">
-                <h3>Best Day</h3>
-                <div class="stat-value" style="font-size: 1.2rem;">${bestDay}</div>
+                <h3 style="margin-bottom: 10px;">Daily Reminder</h3>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="time" id="reminder-time" value="${state.reminderTime || ''}" style="padding: 8px; border-radius: 10px; border: 2px solid var(--border-color); flex: 1; font-family: 'Nunito';">
+                    <button class="btn btn-primary" id="save-reminder-btn">Set</button>
+                </div>
             </div>
-            <div class="stat-card">
-                <h3>Needs Work</h3>
-                <div class="stat-value" style="font-size: 1.2rem;">${worstDay}</div>
-            </div>
+            
+            <button class="btn" id="enable-notif-btn" style="width: 100%; padding: 12px; background: var(--bg-color); border: 2px solid var(--border-color);">🔔 Enable Browser Notifications</button>
+            <button class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;" id="export-csv-btn">📥 Export Data (CSV)</button>
         </div>
-        
-        <h3>Distractions</h3>
-        <div class="stat-row">
-            <span>📱 Texting (${state.distractions.texting})</span>
-            <div class="stat-bar-bg">
-                <div class="stat-bar-fill" style="width: ${(state.distractions.texting / totalDistractions) * 100}%"></div>
-            </div>
-        </div>
-        <div class="stat-row">
-            <span>📺 Watching (${state.distractions.watching})</span>
-            <div class="stat-bar-bg">
-                <div class="stat-bar-fill" style="width: ${(state.distractions.watching / totalDistractions) * 100}%"></div>
-            </div>
-        </div>
-        <div class="stat-row">
-            <span>📚 Studying (${state.distractions.studying})</span>
-            <div class="stat-bar-bg">
-                <div class="stat-bar-fill" style="width: ${(state.distractions.studying / totalDistractions) * 100}%"></div>
-            </div>
-        </div>
-        <div class="stat-row">
-            <span>❓ Other (${state.distractions.other})</span>
-            <div class="stat-bar-bg">
-                <div class="stat-bar-fill" style="width: ${(state.distractions.other / totalDistractions) * 100}%"></div>
-            </div>
-        </div>
-        
-        <h3 style="margin-top: 20px;">Daily Reminder</h3>
-        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
-            <input type="time" id="reminder-time" value="${state.reminderTime || ''}" style="padding: 8px; border-radius: 10px; border: 2px solid var(--border);">
-            <button class="btn btn-primary" id="save-reminder-btn">Set</button>
-            <button class="btn" id="enable-notif-btn">🔔 Enable</button>
-        </div>
-        
-        <button class="btn btn-primary" style="width: 100%;" id="export-csv-btn">📥 Export Data (CSV)</button>
     `;
     
-    // Bind new buttons
+    // Tab Switching Logic
+    const tabBtns = document.querySelectorAll('.stats-tab-btn');
+    const tabContents = document.querySelectorAll('.stats-tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            tabBtns.forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'transparent';
+                b.style.boxShadow = 'none';
+            });
+            e.target.classList.add('active');
+            e.target.style.background = 'var(--card-bg)';
+            e.target.style.boxShadow = '0 2px 0 var(--shadow-color)';
+            
+            tabContents.forEach(tc => tc.style.display = 'none');
+            document.getElementById(e.target.dataset.target).style.display = 'flex';
+        });
+    });
+    
+    // Bind buttons
     const exportBtn = document.getElementById('export-csv-btn');
     if (exportBtn) exportBtn.addEventListener('click', exportCSV);
     
@@ -1450,6 +1475,43 @@ function setupEventListeners() {
     if (DOM.pomoPlay) DOM.pomoPlay.addEventListener('click', startPomo);
     if (DOM.pomoPause) DOM.pomoPause.addEventListener('click', pausePomo);
     if (DOM.pomoReset) DOM.pomoReset.addEventListener('click', resetPomo);
+    
+    // Custom Pomo Inputs
+    const customFocusInput = document.getElementById('custom-focus-time');
+    const customBreakInput = document.getElementById('custom-break-time');
+    if (customFocusInput) customFocusInput.addEventListener('change', resetPomo);
+    if (customBreakInput) customBreakInput.addEventListener('change', resetPomo);
+    
+    // Pomo Presets
+    const presetBtns = document.querySelectorAll('.pomo-preset-btn');
+    presetBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            presetBtns.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            if (customFocusInput) customFocusInput.value = e.target.dataset.focus;
+            if (customBreakInput) customBreakInput.value = e.target.dataset.break;
+            resetPomo();
+        });
+    });
+    
+    // Ambience
+    const ambienceBtn = document.getElementById('ambience-toggle-btn');
+    const ambienceAudio = document.getElementById('ambience-audio');
+    if (ambienceBtn && ambienceAudio) {
+        ambienceBtn.addEventListener('click', () => {
+            if (ambienceAudio.paused) {
+                ambienceAudio.play();
+                ambienceBtn.textContent = '🎵 Lofi Beats (On)';
+                ambienceBtn.style.borderColor = 'var(--primary-dark)';
+                ambienceBtn.style.color = 'var(--primary-dark)';
+            } else {
+                ambienceAudio.pause();
+                ambienceBtn.textContent = '🎵 Lofi Beats (Off)';
+                ambienceBtn.style.borderColor = 'var(--border-color)';
+                ambienceBtn.style.color = 'var(--text-main)';
+            }
+        });
+    }
     
     // Shop Handlers
     const setupShopBtn = (btnId, itemId) => {
