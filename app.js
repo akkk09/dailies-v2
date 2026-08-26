@@ -84,31 +84,33 @@ const DOM = {
 };
 
 // 3. State Object
-let state = {
-    habits: JSON.parse(localStorage.getItem('bunny_habits')) || [
+let defaultState = {
+    habits: [
         { id: '1', name: 'Drink water', completed: false, category: 'health' },
         { id: '2', name: 'Stretch for 5 mins', completed: false, category: 'selfcare' }
     ],
-    streak: parseInt(localStorage.getItem('bunny_streak')) || 0,
-    lastCompletedDate: localStorage.getItem('bunny_last_date') || null,
-    currentDate: localStorage.getItem('bunny_current_date') || getLocalDate(),
+    streak: 0,
+    lastCompletedDate: null,
+    currentDate: getLocalDate(),
     today: getLocalDate(),
-    history: JSON.parse(localStorage.getItem('bunny_history')) || {},
-    distractions: JSON.parse(localStorage.getItem('bunny_distractions')) || { texting: 0, watching: 0, studying: 0, other: 0 },
-    carrots: parseInt(localStorage.getItem('bunny_carrots')) || 0,
-    streakFreezes: parseInt(localStorage.getItem('bunny_streak_freezes')) || 0,
-    totalFocusTime: parseInt(localStorage.getItem('bunny_total_focus')) || 0,
-    focusSessions: parseInt(localStorage.getItem('bunny_focus_sessions')) || 0,
-    xp: parseInt(localStorage.getItem('bunny_xp')) || 0,
-    level: parseInt(localStorage.getItem('bunny_level')) || 1,
-    ownedItems: JSON.parse(localStorage.getItem('bunny_owned_items')) || [],
-    equippedItems: JSON.parse(localStorage.getItem('bunny_equipped_items')) || [],
-    darkMode: localStorage.getItem('bunny_dark_mode') === 'true',
-    lastLoginDate: localStorage.getItem('bunny_last_login') || null,
-    reminderTime: localStorage.getItem('bunny_reminder_time') || null,
-    lastMilestone: parseInt(localStorage.getItem('bunny_last_milestone')) || 0,
-    todayMood: localStorage.getItem('bunny_today_mood') || null
+    history: {},
+    distractions: { texting: 0, watching: 0, studying: 0, other: 0 },
+    carrots: 0,
+    streakFreezes: 0,
+    totalFocusTime: 0,
+    focusSessions: 0,
+    xp: 0,
+    level: 1,
+    ownedItems: [],
+    equippedItems: [],
+    darkMode: false,
+    lastLoginDate: null,
+    reminderTime: null,
+    lastMilestone: 0,
+    todayMood: null
 };
+
+let state = { ...defaultState };
 
 // 4. Pomo Object
 let pomo = { timeLeft: 25 * 60, timerId: null, isRunning: false, mode: 'focus', hiddenTime: 0 };
@@ -688,11 +690,10 @@ function checkNewDay() {
 
 // 14. saveState()
 function saveState() {
+    // Save locally just in case (fallback)
     localStorage.setItem('bunny_habits', JSON.stringify(state.habits));
     localStorage.setItem('bunny_streak', state.streak.toString());
-    if (state.lastCompletedDate) {
-        localStorage.setItem('bunny_last_date', state.lastCompletedDate);
-    }
+    if (state.lastCompletedDate) localStorage.setItem('bunny_last_date', state.lastCompletedDate);
     localStorage.setItem('bunny_current_date', state.currentDate);
     localStorage.setItem('bunny_history', JSON.stringify(state.history));
     localStorage.setItem('bunny_distractions', JSON.stringify(state.distractions));
@@ -705,15 +706,14 @@ function saveState() {
     localStorage.setItem('bunny_owned_items', JSON.stringify(state.ownedItems));
     localStorage.setItem('bunny_equipped_items', JSON.stringify(state.equippedItems));
     localStorage.setItem('bunny_dark_mode', state.darkMode.toString());
-    if (state.lastLoginDate) {
-        localStorage.setItem('bunny_last_login', state.lastLoginDate);
-    }
-    if (state.reminderTime) {
-        localStorage.setItem('bunny_reminder_time', state.reminderTime);
-    }
+    if (state.lastLoginDate) localStorage.setItem('bunny_last_login', state.lastLoginDate);
+    if (state.reminderTime) localStorage.setItem('bunny_reminder_time', state.reminderTime);
     localStorage.setItem('bunny_last_milestone', state.lastMilestone.toString());
-    if (state.todayMood) {
-        localStorage.setItem('bunny_today_mood', state.todayMood);
+    if (state.todayMood) localStorage.setItem('bunny_today_mood', state.todayMood);
+    
+    // Sync to Supabase
+    if (window.Auth && Auth.user) {
+        Auth.saveToCloud(state);
     }
 }
 
@@ -1015,6 +1015,7 @@ function renderStatsModal() {
             
             <button class="btn" id="enable-notif-btn" style="width: 100%; padding: 12px; background: var(--bg-color); border: 2px solid var(--border-color);">🔔 Enable Browser Notifications</button>
             <button class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;" id="export-csv-btn">📥 Export Data (CSV)</button>
+            <button class="btn" id="auth-logout-btn" style="width: 100%; padding: 12px; margin-top: 10px; background: #ff6b6b; color: white; border: none;">🚪 Logout</button>
         </div>
     `;
     
@@ -1041,6 +1042,13 @@ function renderStatsModal() {
     // Bind buttons
     const exportBtn = document.getElementById('export-csv-btn');
     if (exportBtn) exportBtn.addEventListener('click', exportCSV);
+    
+    const logoutBtn = document.getElementById('auth-logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            if (window.Auth) Auth.logout();
+        });
+    }
     
     const saveRemBtn = document.getElementById('save-reminder-btn');
     const remInput = document.getElementById('reminder-time');
@@ -1851,4 +1859,4 @@ function renderStreak() {
 }
 
 // 32. Call init()
-document.addEventListener('DOMContentLoaded', init);
+window.appInit = init;

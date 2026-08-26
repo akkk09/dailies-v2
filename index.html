@@ -258,6 +258,28 @@
         </div>
     </div>
 
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" style="position: fixed; inset: 0; background: var(--bg-color); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: var(--card-bg); padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(255,182,193,0.3); width: 100%; max-width: 350px; text-align: center; border: 3px solid var(--border-color);">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🐰</div>
+            <h2 style="color: var(--primary-dark); margin-bottom: 5px;">Bunny Habits</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Please login to sync your progress!</p>
+            
+            <form id="auth-form" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="email" id="auth-email" placeholder="Email" required style="padding: 12px; border-radius: 12px; border: 2px solid var(--border-color); font-family: 'Nunito';">
+                <input type="password" id="auth-password" placeholder="Password" required style="padding: 12px; border-radius: 12px; border: 2px solid var(--border-color); font-family: 'Nunito';">
+                <div id="auth-error" style="color: #ff6b6b; font-size: 0.8rem; display: none;"></div>
+                
+                <button type="submit" id="auth-login-btn" class="btn btn-primary" style="padding: 12px; border-radius: 12px; font-weight: bold;">Login</button>
+                <button type="button" id="auth-signup-btn" class="btn" style="padding: 12px; border-radius: 12px; font-weight: bold; background: var(--bg-color); border: 2px solid var(--primary-dark); color: var(--primary-dark);">Sign Up</button>
+            </form>
+            
+            <div id="auth-loading" style="display: none; margin-top: 15px; color: var(--primary-dark); font-weight: bold;">
+                Syncing with cloud... ☁️
+            </div>
+        </div>
+    </div>
+
     <!-- Modals -->
     <!-- Add Habit Modal -->
     <div class="modal" id="add-modal">
@@ -334,12 +356,15 @@
     <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous" async></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="app.js"></script>
     <script>
         // Initialize Twemoji
         window.addEventListener('DOMContentLoaded', () => {
             twemoji.parse(document.body);
         });
     </script>
-    <script src="app.js"></script>
 </body>
 </html>
