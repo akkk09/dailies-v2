@@ -1691,6 +1691,7 @@ function setupMoodPicker() {
             if (moodMessages[mood]) {
                 const msgs = moodMessages[mood].start;
                 setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+                showBunnyPopup();
             }
             
             // Bonus XP toast for rough/sad days
