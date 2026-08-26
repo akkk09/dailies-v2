@@ -104,6 +104,7 @@ let defaultState = {
     ownedItems: [],
     equippedItems: [],
     darkMode: false,
+    activeTheme: 'light',
     lastLoginDate: null,
     reminderTime: null,
     lastMilestone: 0,
@@ -533,13 +534,17 @@ function setMascotMessage(msg) {
     }
 }
 
-// 10. init() function
+// 10. Initialization
 function init() {
-    // Apply dark mode if saved
-    if (state.darkMode) {
+    // Apply theme
+    if (state.activeTheme && state.activeTheme !== 'light' && state.activeTheme !== 'dark') {
+        document.documentElement.setAttribute('data-theme', state.activeTheme);
+        if (DOM.darkModeBtn) DOM.darkModeBtn.textContent = '🎨';
+    } else if (state.darkMode || state.activeTheme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         if (DOM.darkModeBtn) DOM.darkModeBtn.textContent = '☀️';
     } else {
+        document.documentElement.removeAttribute('data-theme');
         if (DOM.darkModeBtn) DOM.darkModeBtn.textContent = '🌙';
     }
     
@@ -1490,18 +1495,6 @@ function setupEventListeners() {
     if (customFocusInput) customFocusInput.addEventListener('change', resetPomo);
     if (customBreakInput) customBreakInput.addEventListener('change', resetPomo);
     
-    // Pomo Presets
-    const presetBtns = document.querySelectorAll('.pomo-preset-btn');
-    presetBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            presetBtns.forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            if (customFocusInput) customFocusInput.value = e.target.dataset.focus;
-            if (customBreakInput) customBreakInput.value = e.target.dataset.break;
-            resetPomo();
-        });
-    });
-    
     // Ambience
     const ambienceBtn = document.getElementById('ambience-toggle-btn');
     const ambienceAudio = document.getElementById('ambience-audio');
@@ -1522,48 +1515,23 @@ function setupEventListeners() {
     }
     
     // Shop Handlers
-    const setupShopBtn = (btnId, itemId) => {
+    const setupShopBtn = (btnId, itemId, cost) => {
         const btn = document.getElementById(btnId);
         if (!btn) return;
-        btn.addEventListener('click', () => {
-            const itemDef = SHOP_ITEMS.find(i => i.id === itemId);
-            if (!itemDef) return;
-            
-            if (state.equippedItems.includes(itemId)) {
-                // Unequip
-                state.equippedItems = state.equippedItems.filter(id => id !== itemId);
-            } else if (state.ownedItems.includes(itemId)) {
-                // Equip
-                state.equippedItems.push(itemId);
-            } else {
-                // Buy
-                if (state.carrots >= itemDef.cost) {
-                    state.carrots -= itemDef.cost;
-                    state.ownedItems.push(itemId);
-                    showToast(`Bought ${itemDef.name}!`);
-                    renderCarrots();
-                } else {
-                    gsap.to(btn, { x: 5, duration: 0.1, yoyo: true, repeat: 3 });
-                    showToast("Not enough 🥕!");
-                    return;
-                }
-            }
-            saveState();
-            renderAccessories();
-            updateAllShopButtons();
-            if (typeof twemoji !== 'undefined') twemoji.parse(btn.parentElement);
-        });
+        btn.addEventListener('click', () => handleShopPurchase(itemId, cost));
     };
     
-    setupShopBtn('buy-hat-btn', 'hat');
-    setupShopBtn('buy-glasses-btn', 'glasses');
-    setupShopBtn('buy-crown-btn', 'crown');
-    setupShopBtn('buy-wand-btn', 'wand');
+    setupShopBtn('buy-hat-btn', 'hat', 20);
+    setupShopBtn('buy-glasses-btn', 'glasses', 40);
+    setupShopBtn('buy-crown-btn', 'crown', 80);
+    setupShopBtn('buy-wand-btn', 'wand', 60);
+    setupShopBtn('buy-theme-matcha-btn', 'theme_matcha', 100);
+    setupShopBtn('buy-theme-lavender-btn', 'theme_lavender', 100);
     
     if (DOM.buyFreezeBtn) {
         DOM.buyFreezeBtn.addEventListener('click', () => {
-            if (state.carrots >= 50) {
-                state.carrots -= 50;
+            if (state.carrots >= 30) {
+                state.carrots -= 30;
                 state.streakFreezes++;
                 saveState();
                 renderCarrots();

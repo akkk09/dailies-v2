@@ -24,8 +24,9 @@ const Auth = {
             if (session) {
                 this.user = session.user;
                 document.getElementById('auth-overlay').style.display = 'none';
-                // Trigger a reload so app.js fetches cloud state
-                if (_event === 'SIGNED_IN') {
+                
+                // Only reload if this was an active manual login, not just a token refresh
+                if (_event === 'SIGNED_IN' && this.isManualLogin) {
                     window.location.reload();
                 }
             } else {
@@ -59,6 +60,7 @@ const Auth = {
             e.preventDefault();
             loadingDiv.style.display = 'block';
             errorDiv.style.display = 'none';
+            Auth.isManualLogin = true;
             
             const email = emailInput.value;
             const password = passwordInput.value;
