@@ -103,10 +103,22 @@
                 
                 <div class="pomo-display" id="pomo-display">25:00</div>
                 
-                <!-- Background Ambiance Toggle -->
-                <div class="ambience-controls" style="margin-top: 15px; text-align: center;">
-                    <button id="ambience-toggle-btn" class="btn" style="background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 20px; padding: 8px 15px; width: 100%; font-weight: bold;">🎵 Lofi Beats (Off)</button>
-                    <!-- A short lofi beat mp3 from free assets -->
+                <!-- Background Ambiance Controls -->
+                <div class="ambience-controls" style="margin-top: 15px;">
+                    <p style="text-align: center; font-size: 0.8rem; font-weight: bold; color: var(--text-muted); margin-bottom: 8px;">Background Ambience</p>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button id="ambience-lofi-btn" class="btn" style="flex: 1; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 12px; padding: 8px; font-weight: bold;">🎧 Lofi</button>
+                        <button id="ambience-spotify-btn" class="btn" style="flex: 1; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 12px; padding: 8px; font-weight: bold;">🟢 Spotify</button>
+                    </div>
+                    
+                    <div id="spotify-container" style="display: none; background: var(--bg-color); padding: 10px; border-radius: 12px; border: 2px solid var(--border-color);">
+                        <input type="text" id="spotify-link-input" placeholder="Paste Spotify URL..." style="width: 100%; padding: 8px; border-radius: 8px; border: 2px solid var(--border-color); margin-bottom: 10px; font-family: 'Nunito'; text-align: center;">
+                        <div id="spotify-embed-wrapper">
+                            <!-- Default playlist -->
+                            <iframe id="spotify-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                    
                     <audio id="ambience-audio" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"></audio>
                 </div>
 

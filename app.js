@@ -106,6 +106,7 @@ let defaultState = {
     darkMode: false,
     activeTheme: 'light',
     lastLoginDate: null,
+    spotifyUrl: null,
     reminderTime: null,
     lastMilestone: 0,
     todayMood: null
@@ -1496,22 +1497,76 @@ function setupEventListeners() {
     if (customBreakInput) customBreakInput.addEventListener('change', resetPomo);
     
     // Ambience
-    const ambienceBtn = document.getElementById('ambience-toggle-btn');
+    const lofiBtn = document.getElementById('ambience-lofi-btn');
+    const spotifyBtn = document.getElementById('ambience-spotify-btn');
+    const spotifyContainer = document.getElementById('spotify-container');
+    const spotifyInput = document.getElementById('spotify-link-input');
+    const spotifyIframe = document.getElementById('spotify-iframe');
     const ambienceAudio = document.getElementById('ambience-audio');
-    if (ambienceBtn && ambienceAudio) {
-        ambienceBtn.addEventListener('click', () => {
+    
+    // Initialize Spotify URL from state if exists
+    if (state.spotifyUrl && spotifyIframe && spotifyInput) {
+        spotifyIframe.src = state.spotifyUrl;
+        spotifyInput.value = state.spotifyUrl;
+    }
+
+    if (lofiBtn && spotifyBtn && ambienceAudio && spotifyContainer) {
+        lofiBtn.addEventListener('click', () => {
+            // Hide Spotify
+            spotifyContainer.style.display = 'none';
+            spotifyBtn.style.borderColor = 'var(--border-color)';
+            spotifyBtn.style.color = 'var(--text-main)';
+            
+            // Toggle Lofi
             if (ambienceAudio.paused) {
                 ambienceAudio.play();
-                ambienceBtn.textContent = '🎵 Lofi Beats (On)';
-                ambienceBtn.style.borderColor = 'var(--primary-dark)';
-                ambienceBtn.style.color = 'var(--primary-dark)';
+                lofiBtn.textContent = '🎧 Lofi (On)';
+                lofiBtn.style.borderColor = 'var(--primary-dark)';
+                lofiBtn.style.color = 'var(--primary-dark)';
             } else {
                 ambienceAudio.pause();
-                ambienceBtn.textContent = '🎵 Lofi Beats (Off)';
-                ambienceBtn.style.borderColor = 'var(--border-color)';
-                ambienceBtn.style.color = 'var(--text-main)';
+                lofiBtn.textContent = '🎧 Lofi (Off)';
+                lofiBtn.style.borderColor = 'var(--border-color)';
+                lofiBtn.style.color = 'var(--text-main)';
             }
         });
+        
+        spotifyBtn.addEventListener('click', () => {
+            // Pause Lofi
+            ambienceAudio.pause();
+            lofiBtn.textContent = '🎧 Lofi';
+            lofiBtn.style.borderColor = 'var(--border-color)';
+            lofiBtn.style.color = 'var(--text-main)';
+            
+            // Toggle Spotify
+            if (spotifyContainer.style.display === 'none') {
+                spotifyContainer.style.display = 'block';
+                spotifyBtn.style.borderColor = 'var(--primary-dark)';
+                spotifyBtn.style.color = 'var(--primary-dark)';
+            } else {
+                spotifyContainer.style.display = 'none';
+                spotifyBtn.style.borderColor = 'var(--border-color)';
+                spotifyBtn.style.color = 'var(--text-main)';
+            }
+        });
+        
+        if (spotifyInput) {
+            spotifyInput.addEventListener('change', (e) => {
+                const url = e.target.value;
+                if (!url) return;
+                
+                // Convert standard spotify URL to embed URL
+                // e.g. https://open.spotify.com/playlist/0vvXs... -> https://open.spotify.com/embed/playlist/0vvXs...
+                let embedUrl = url;
+                if (url.includes('open.spotify.com') && !url.includes('/embed/')) {
+                    embedUrl = url.replace('open.spotify.com/', 'open.spotify.com/embed/').split('?')[0] + '?utm_source=generator&theme=0';
+                }
+                
+                spotifyIframe.src = embedUrl;
+                state.spotifyUrl = embedUrl;
+                saveState();
+            });
+        }
     }
     
     // Shop Handlers
