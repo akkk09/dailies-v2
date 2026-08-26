@@ -345,15 +345,15 @@ function renderAccessories() {
     }
     
     if (state.equippedItems.includes('hat')) {
-        const hatGeo = new THREE.ConeGeometry(0.3, 0.5, 16);
+        const hatGeo = new THREE.ConeGeometry(0.3, 0.6, 16);
         const hatMat = new THREE.MeshLambertMaterial({ color: 0xffb6c1 });
         const hat = new THREE.Mesh(hatGeo, hatMat);
-        hat.position.set(0, 2.2, 0);
+        hat.position.set(0, 2.9, 0); // Moved up (head top is at 2.7)
         
         const tipGeo = new THREE.SphereGeometry(0.08, 8, 8);
         const tipMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
         const tip = new THREE.Mesh(tipGeo, tipMat);
-        tip.position.set(0, 0.25, 0);
+        tip.position.set(0, 0.3, 0);
         hat.add(tip);
         
         accessoryGroup.add(hat);
@@ -361,7 +361,7 @@ function renderAccessories() {
     
     if (state.equippedItems.includes('glasses')) {
         const glassesGroup = new THREE.Group();
-        const lensGeo = new THREE.TorusGeometry(0.18, 0.03, 8, 16);
+        const lensGeo = new THREE.TorusGeometry(0.2, 0.04, 8, 16);
         const lensMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
         
         const lLens = new THREE.Mesh(lensGeo, lensMat);
@@ -372,11 +372,22 @@ function renderAccessories() {
         rLens.position.set(0.4, 1.7, 1.25);
         glassesGroup.add(rLens);
         
-        const bridgeGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8);
+        const bridgeGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.4, 8);
         const bridge = new THREE.Mesh(bridgeGeo, lensMat);
         bridge.position.set(0, 1.7, 1.25);
         bridge.rotation.z = Math.PI / 2;
         glassesGroup.add(bridge);
+        
+        // Add temples (arms of glasses)
+        const lTemple = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.8, 8), lensMat);
+        lTemple.position.set(-0.6, 1.7, 0.85);
+        lTemple.rotation.x = Math.PI / 2;
+        glassesGroup.add(lTemple);
+        
+        const rTemple = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.8, 8), lensMat);
+        rTemple.position.set(0.6, 1.7, 0.85);
+        rTemple.rotation.x = Math.PI / 2;
+        glassesGroup.add(rTemple);
         
         accessoryGroup.add(glassesGroup);
     }
@@ -385,7 +396,7 @@ function renderAccessories() {
         const crownGeo = new THREE.TorusGeometry(0.35, 0.08, 8, 6);
         const crownMat = new THREE.MeshLambertMaterial({ color: 0xffd700 });
         const crown = new THREE.Mesh(crownGeo, crownMat);
-        crown.position.set(0, 2.0, 0);
+        crown.position.set(0, 2.65, 0); // Moved up
         crown.rotation.x = Math.PI / 2;
         
         for (let i=0; i<6; i++) {
@@ -402,19 +413,19 @@ function renderAccessories() {
     if (state.equippedItems.includes('wand')) {
         const wandGroup = new THREE.Group();
         
-        const stickGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.8, 8);
+        const stickGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.0, 8);
         const stickMat = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
         const stick = new THREE.Mesh(stickGeo, stickMat);
         
-        const starGeo = new THREE.DodecahedronGeometry(0.12);
+        const starGeo = new THREE.DodecahedronGeometry(0.15);
         const starMat = new THREE.MeshLambertMaterial({ color: 0xffd700 });
         const star = new THREE.Mesh(starGeo, starMat);
-        star.position.set(0, 0.4, 0);
+        star.position.set(0, 0.5, 0);
         
         wandGroup.add(stick);
         wandGroup.add(star);
         
-        wandGroup.position.set(1.0, 0.3, 0.6);
+        wandGroup.position.set(1.2, 0.5, 0.6); // Moved outward to not clip with arm
         wandGroup.rotation.z = -0.3;
         wandGroup.rotation.x = 0.3;
         accessoryGroup.add(wandGroup);
