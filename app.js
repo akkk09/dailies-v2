@@ -717,25 +717,11 @@ function checkNewDay() {
 // 14. saveState()
 function saveState() {
     // Save locally just in case (fallback)
-    localStorage.setItem('bunny_habits', JSON.stringify(state.habits));
-    localStorage.setItem('bunny_streak', state.streak.toString());
-    if (state.lastCompletedDate) localStorage.setItem('bunny_last_date', state.lastCompletedDate);
-    localStorage.setItem('bunny_current_date', state.currentDate);
-    localStorage.setItem('bunny_history', JSON.stringify(state.history));
-    localStorage.setItem('bunny_distractions', JSON.stringify(state.distractions));
-    localStorage.setItem('bunny_carrots', state.carrots.toString());
-    localStorage.setItem('bunny_streak_freezes', state.streakFreezes.toString());
-    localStorage.setItem('bunny_total_focus', state.totalFocusTime.toString());
-    localStorage.setItem('bunny_focus_sessions', state.focusSessions.toString());
-    localStorage.setItem('bunny_xp', state.xp.toString());
-    localStorage.setItem('bunny_level', state.level.toString());
-    localStorage.setItem('bunny_owned_items', JSON.stringify(state.ownedItems));
-    localStorage.setItem('bunny_equipped_items', JSON.stringify(state.equippedItems));
-    localStorage.setItem('bunny_dark_mode', state.darkMode.toString());
-    if (state.lastLoginDate) localStorage.setItem('bunny_last_login', state.lastLoginDate);
-    if (state.reminderTime) localStorage.setItem('bunny_reminder_time', state.reminderTime);
-    localStorage.setItem('bunny_last_milestone', state.lastMilestone.toString());
-    if (state.todayMood) localStorage.setItem('bunny_today_mood', state.todayMood);
+    try {
+        localStorage.setItem('bunny_state_fallback', JSON.stringify(state));
+    } catch (e) {
+        console.error("Local storage fallback failed", e);
+    }
     
     // Sync to Supabase
     if (window.Auth && Auth.user) {

@@ -12,6 +12,12 @@ const Auth = {
             if (cloudState) {
                 // Merge cloud state into global state
                 Object.assign(state, cloudState);
+                
+                // Ensure critical number fields are valid numbers
+                state.xp = Number(state.xp) || 0;
+                state.level = Number(state.level) || 1;
+                state.carrots = Number(state.carrots) || 0;
+                state.streak = Number(state.streak) || 0;
             }
             if (window.appInit) window.appInit();
         } else {
