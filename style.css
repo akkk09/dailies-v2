@@ -635,6 +635,11 @@ body {
   border-color: #e91e63;
 }
 
+.heatmap-cell.level-4 {
+  background-color: #e91e63;
+  border-color: #c2185b;
+}
+
 .heatmap-cell.frozen {
   background-color: #e0f7fa;
   border-color: #80deea;
