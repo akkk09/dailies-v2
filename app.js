@@ -739,6 +739,7 @@ function saveTodayToHistory() {
         mood: state.todayMood || (existingEntry ? existingEntry.mood : null)
     };
     saveState();
+    renderHeatmap();
 }
 
 // 15. Pomodoro Logic
