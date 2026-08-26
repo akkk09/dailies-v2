@@ -569,6 +569,11 @@ function init() {
     if (habitsView) tl.from(habitsView, { y: 20, opacity: 0, duration: 0.5, ease: "power2.out", clearProps: "all" }, "-=0.3");
     const nav = document.querySelector('.bottom-nav');
     if (nav) tl.from(nav, { y: 50, opacity: 0, duration: 0.5, ease: "back.out(1.2)", clearProps: "all" }, "-=0.4");
+    
+    // Show bunny on launch
+    setTimeout(() => {
+        showBunnyPopup();
+    }, 800);
 }
 
 // 11. checkDailyLogin()
@@ -1218,7 +1223,10 @@ function createHabitElement(habit) {
             if (state.todayMood && moodMessages[state.todayMood]) {
                 const msgs = moodMessages[state.todayMood].habit;
                 setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+            } else {
+                setMascotMessage(messages.middle[Math.floor(Math.random() * messages.middle.length)]);
             }
+            showBunnyPopup();
             
             animateThreeClick();
         }
