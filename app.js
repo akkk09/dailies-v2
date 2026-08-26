@@ -724,7 +724,7 @@ function saveState() {
     }
     
     // Sync to Supabase
-    if (window.Auth && Auth.user) {
+    if (typeof Auth !== 'undefined' && Auth.user) {
         Auth.saveToCloud(state);
     }
 }
@@ -1058,7 +1058,7 @@ function renderStatsModal() {
     const logoutBtn = document.getElementById('auth-logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            if (window.Auth) Auth.logout();
+            if (typeof Auth !== 'undefined') Auth.logout();
         });
     }
     

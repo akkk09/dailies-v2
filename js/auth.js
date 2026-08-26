@@ -18,6 +18,9 @@ const Auth = {
                 state.level = Number(state.level) || 1;
                 state.carrots = Number(state.carrots) || 0;
                 state.streak = Number(state.streak) || 0;
+                
+                // Fix date overrides
+                state.today = new Date().toLocaleDateString('en-CA'); // e.g. YYYY-MM-DD
             }
             if (window.appInit) window.appInit();
         } else {
