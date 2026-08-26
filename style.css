@@ -1131,3 +1131,45 @@ body {
   margin-right: 8px;
   vertical-align: middle;
 }
+
+/* Stats Modal Tweaks */
+.stats-tab-btn {
+  transition: all 0.2s;
+}
+.stat-card {
+  background-color: var(--bg-color);
+  border-radius: 16px;
+  padding: 15px;
+  border: 2px solid var(--border-color);
+  box-shadow: 0 4px 0 var(--shadow-color);
+  text-align: center;
+}
+.stat-card h3 {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+.stat-value {
+  color: var(--primary-dark);
+  font-weight: 800;
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.stat-bar-bg {
+  flex: 1;
+  background-color: var(--card-bg);
+  height: 8px;
+  border-radius: 4px;
+  margin-left: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+.stat-bar-fill {
+  background-color: var(--primary-dark);
+  height: 100%;
+  border-radius: 4px;
+}
