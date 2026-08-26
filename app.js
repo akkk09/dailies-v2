@@ -106,18 +106,45 @@ let state = {
     darkMode: localStorage.getItem('bunny_dark_mode') === 'true',
     lastLoginDate: localStorage.getItem('bunny_last_login') || null,
     reminderTime: localStorage.getItem('bunny_reminder_time') || null,
-    lastMilestone: parseInt(localStorage.getItem('bunny_last_milestone')) || 0
+    lastMilestone: parseInt(localStorage.getItem('bunny_last_milestone')) || 0,
+    todayMood: localStorage.getItem('bunny_today_mood') || null
 };
 
 // 4. Pomo Object
 let pomo = { timeLeft: 25 * 60, timerId: null, isRunning: false, mode: 'focus', hiddenTime: 0 };
 
-// 5. Messages
+// 5. Messages (mood-aware)
 const messages = {
     start: ["Hi cutie! Ready to crush your goals today? 💕", "Let's have a wonderful day! 🌸", "I believe in you! 💖"],
     middle: ["You're doing amazing! Keep going! ✨", "So proud of you! 🥰", "Almost there cutie! 🥕"],
     done: ["YAY! Perfect day! You're the best! 🎉", "All done! I love you! 💕", "Wow! You're unstoppable! 🌟"]
 };
+
+const moodMessages = {
+    great: {
+        start: ["Yay! You're glowing today! Let's make it amazing! ✨", "Your energy is contagious! 🌟", "I love seeing you happy! Let's gooo! 💖"],
+        habit: ["You're on fire today! 🔥", "That's the spirit! Keep shining! ✨", "Nothing can stop you today! 💪"]
+    },
+    good: {
+        start: ["Good vibes today! Let's keep it going! 🌸", "What a lovely day to be productive! 🌻", "You've got this cutie! 💕"],
+        habit: ["Nice work! You're doing great! 🌈", "One step at a time! 💫", "Keep it up sweetheart! 🥰"]
+    },
+    okay: {
+        start: ["Hey! Even okay days are worth showing up for 💛", "Some days are just okay, and that's perfectly fine! 🌼", "I'm here with you today! 💕"],
+        habit: ["Every little bit counts! 🌿", "You're still going, that's what matters! 💚", "Proud of you for trying! 🌸"]
+    },
+    sad: {
+        start: ["I'm so proud you showed up today 💕", "Hey, it's okay to feel sad. I'm right here with you 🫂", "Sending you the biggest bunny hug 🐰💗", "Bad days don't last forever, but I'll always be here 💕"],
+        habit: ["You're so brave for doing this today 💗", "Even on hard days, you're amazing 🌸", "One tiny step — that's all you need 💛", "I'm so proud of every single thing you do today 🥺"]
+    },
+    rough: {
+        start: ["Hey... I know today is tough. But you opened this app, and that already makes you incredible 💕", "You don't have to be perfect today. Just be here. I love you 🫂", "The fact that you're trying means everything to me 🐰💗"],
+        habit: ["You absolute warrior 💪💕", "This took so much strength. I see you 🥺", "Every habit today is worth double because you're pushing through 🌟", "I'm literally the proudest bunny right now 🐰✨"]
+    }
+};
+
+const MOOD_EMOJIS = { great: '😊', good: '🙂', okay: '😐', sad: '😔', rough: '😢' };
+const MOOD_LABELS = { great: 'Great', good: 'Good', okay: 'Okay', sad: 'Sad', rough: 'Rough' };
 
 // 6. Level System Constants
 const LEVELS = [
@@ -171,9 +198,10 @@ function initThreeJS() {
     const pinkMat = new THREE.MeshLambertMaterial({ color: 0xffb6c1 });
     const blackMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
     
-    // Body
-    const bodyGeo = new THREE.CylinderGeometry(1, 1, 1.5, 16);
+    // Body - squished sphere for a round chubby body
+    const bodyGeo = new THREE.SphereGeometry(1, 32, 32);
     const body = new THREE.Mesh(bodyGeo, whiteMat);
+    body.scale.set(1, 1.1, 0.9);
     body.position.y = 0;
     bunnyGroup.add(body);
     
@@ -183,24 +211,28 @@ function initThreeJS() {
     head.position.y = 1.5;
     bunnyGroup.add(head);
     
-    // Ears
-    const earGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.2, 16);
+    // Ears - elongated spheres
+    const earGeo = new THREE.SphereGeometry(0.3, 16, 16);
     const leftEar = new THREE.Mesh(earGeo, whiteMat);
-    leftEar.position.set(-0.6, 2.8, 0);
-    leftEar.rotation.z = 0.2;
+    leftEar.scale.set(0.6, 2.2, 0.5);
+    leftEar.position.set(-0.5, 3.0, 0);
+    leftEar.rotation.z = 0.15;
     bunnyGroup.add(leftEar);
     const rightEar = new THREE.Mesh(earGeo, whiteMat);
-    rightEar.position.set(0.6, 2.8, 0);
-    rightEar.rotation.z = -0.2;
+    rightEar.scale.set(0.6, 2.2, 0.5);
+    rightEar.position.set(0.5, 3.0, 0);
+    rightEar.rotation.z = -0.15;
     bunnyGroup.add(rightEar);
     
-    // Inner Ears
-    const innerEarGeo = new THREE.CylinderGeometry(0.15, 0.15, 1, 16);
+    // Inner Ears - smaller pink elongated spheres
+    const innerEarGeo = new THREE.SphereGeometry(0.25, 16, 16);
     const leftInner = new THREE.Mesh(innerEarGeo, pinkMat);
-    leftInner.position.set(0, 0, 0.2);
+    leftInner.scale.set(0.5, 1.8, 0.3);
+    leftInner.position.set(0, 0, 0.15);
     leftEar.add(leftInner);
     const rightInner = new THREE.Mesh(innerEarGeo, pinkMat);
-    rightInner.position.set(0, 0, 0.2);
+    rightInner.scale.set(0.5, 1.8, 0.3);
+    rightInner.position.set(0, 0, 0.15);
     rightEar.add(rightInner);
     
     // Eyes
@@ -239,27 +271,52 @@ function initThreeJS() {
     rBlush.rotation.y = 0.2;
     bunnyGroup.add(rBlush);
     
-    // Arms
-    const armGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.8, 16);
+    // Arms - small round spheres
+    const armGeo = new THREE.SphereGeometry(0.28, 16, 16);
     const leftArm = new THREE.Mesh(armGeo, whiteMat);
+    leftArm.scale.set(0.8, 1.2, 0.8);
     leftArm.position.set(-1.1, 0.2, 0);
-    leftArm.rotation.z = -0.5;
     bunnyGroup.add(leftArm);
     const rightArm = new THREE.Mesh(armGeo, whiteMat);
+    rightArm.scale.set(0.8, 1.2, 0.8);
     rightArm.position.set(1.1, 0.2, 0);
-    rightArm.rotation.z = 0.5;
     bunnyGroup.add(rightArm);
     
-    // Feet
-    const footGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.8, 16);
+    // Feet - oval spheres sticking out front
+    const footGeo = new THREE.SphereGeometry(0.35, 16, 16);
     leftFoot = new THREE.Mesh(footGeo, whiteMat);
-    leftFoot.position.set(-0.5, -1, 0.5);
-    leftFoot.rotation.x = Math.PI / 2;
+    leftFoot.scale.set(0.7, 0.5, 1.2);
+    leftFoot.position.set(-0.5, -0.9, 0.5);
     bunnyGroup.add(leftFoot);
     rightFoot = new THREE.Mesh(footGeo, whiteMat);
-    rightFoot.position.set(0.5, -1, 0.5);
-    rightFoot.rotation.x = Math.PI / 2;
+    rightFoot.scale.set(0.7, 0.5, 1.2);
+    rightFoot.position.set(0.5, -0.9, 0.5);
     bunnyGroup.add(rightFoot);
+    
+    // Toe beans! tiny pink spheres on feet
+    const beanGeo = new THREE.SphereGeometry(0.06, 8, 8);
+    for (let foot of [leftFoot, rightFoot]) {
+        const bean1 = new THREE.Mesh(beanGeo, pinkMat);
+        bean1.position.set(-0.1, 0.15, 0.2);
+        foot.add(bean1);
+        const bean2 = new THREE.Mesh(beanGeo, pinkMat);
+        bean2.position.set(0.1, 0.15, 0.2);
+        foot.add(bean2);
+        const bean3 = new THREE.Mesh(beanGeo, pinkMat);
+        bean3.position.set(0, 0.15, 0.3);
+        foot.add(bean3);
+        // Big pad
+        const padGeo = new THREE.SphereGeometry(0.1, 8, 8);
+        const pad = new THREE.Mesh(padGeo, pinkMat);
+        pad.position.set(0, 0.12, 0);
+        foot.add(pad);
+    }
+    
+    // Tail - fluffy pom
+    const tailGeo = new THREE.SphereGeometry(0.3, 16, 16);
+    const tail = new THREE.Mesh(tailGeo, whiteMat);
+    tail.position.set(0, -0.3, -0.9);
+    bunnyGroup.add(tail);
     
     // Accessory Group
     accessoryGroup = new THREE.Group();
@@ -376,8 +433,8 @@ function animateThree() {
         bunnyGroup.position.y = Math.sin(t * 3) * 0.1;
         
         if (leftFoot && rightFoot) {
-            leftFoot.rotation.x = Math.PI / 2 + Math.sin(t * 4) * 0.05;
-            rightFoot.rotation.x = Math.PI / 2 + Math.cos(t * 4) * 0.05;
+            leftFoot.position.y = -0.9 + Math.sin(t * 4) * 0.03;
+            rightFoot.position.y = -0.9 + Math.cos(t * 4) * 0.03;
         }
     }
     
@@ -487,12 +544,21 @@ function init() {
     updateProgress(true);
     renderAccessories();
     setupEventListeners();
+    setupMoodPicker();
     setupDragAndDrop();
     updatePomoDisplay();
     setupNotifications();
     
-    // Set greeting
-    setMascotMessage(getGreeting());
+    // Set mood-aware greeting
+    if (state.todayMood && moodMessages[state.todayMood]) {
+        const msgs = moodMessages[state.todayMood].start;
+        setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+    } else {
+        setMascotMessage(getGreeting());
+    }
+    
+    // Restore mood picker selection
+    renderMoodSelection();
     
     // Parse twemoji
     if (typeof twemoji !== 'undefined') twemoji.parse(document.body);
@@ -559,6 +625,7 @@ function checkNewDay() {
             h.completed = false;
             h.note = "";
         });
+        state.todayMood = null; // Reset mood for new day
         
         if (state.lastCompletedDate) {
             const lastDate = new Date(state.lastCompletedDate + 'T12:00:00');
@@ -629,6 +696,9 @@ function saveState() {
         localStorage.setItem('bunny_reminder_time', state.reminderTime);
     }
     localStorage.setItem('bunny_last_milestone', state.lastMilestone.toString());
+    if (state.todayMood) {
+        localStorage.setItem('bunny_today_mood', state.todayMood);
+    }
 }
 
 function saveTodayToHistory() {
@@ -637,7 +707,8 @@ function saveTodayToHistory() {
     
     state.history[state.today] = {
         habits: JSON.parse(JSON.stringify(state.habits)),
-        frozen: isFrozen
+        frozen: isFrozen,
+        mood: state.todayMood || (existingEntry ? existingEntry.mood : null)
     };
     saveState();
 }
@@ -768,23 +839,36 @@ function openHistoryModal(dateStr, historyData) {
             DOM.historyDetails.innerHTML = '<p>No data for this date.</p>';
         } else if (historyData.frozen) {
             DOM.historyDetails.innerHTML = '<div style="text-align:center; padding: 20px;"><span style="font-size: 3rem;">❄️</span><p>Streak was frozen on this day!</p></div>';
-        } else if (historyData.habits && historyData.habits.length > 0) {
-            historyData.habits.forEach(h => {
-                const item = document.createElement('div');
-                item.className = `habit-item ${h.completed ? 'completed' : ''}`;
-                item.style.marginBottom = '10px';
-                
-                item.innerHTML = `
-                    <div class="habit-info">
-                        <span class="cat-dot ${h.category || 'other'}"></span>
-                        <div class="check-circle"></div>
-                        <span class="habit-name">${h.name}</span>
-                    </div>
-                `;
-                DOM.historyDetails.appendChild(item);
-            });
         } else {
-            DOM.historyDetails.innerHTML = '<p>No habits recorded.</p>';
+            let moodHtml = '';
+            if (historyData.mood) {
+                const emoji = MOOD_EMOJIS[historyData.mood] || '';
+                const label = MOOD_LABELS[historyData.mood] || '';
+                moodHtml = `<div style="text-align:center; padding: 10px; margin-bottom: 10px; background: var(--bg-color); border-radius: 15px;">
+                    <span style="font-size: 2rem;">${emoji}</span>
+                    <p style="font-weight: 700; color: var(--primary-dark); margin-top: 5px;">Feeling ${label}</p>
+                </div>`;
+            }
+            
+            if (historyData.habits && historyData.habits.length > 0) {
+                DOM.historyDetails.innerHTML = moodHtml;
+                historyData.habits.forEach(h => {
+                    const item = document.createElement('div');
+                    item.className = `habit-item ${h.completed ? 'completed' : ''}`;
+                    item.style.marginBottom = '10px';
+                    
+                    item.innerHTML = `
+                        <div class="habit-info">
+                            <span class="cat-dot ${h.category || 'other'}"></span>
+                            <div class="check-circle"></div>
+                            <span class="habit-name">${h.name}</span>
+                        </div>
+                    `;
+                    DOM.historyDetails.appendChild(item);
+                });
+            } else {
+                DOM.historyDetails.innerHTML = moodHtml + '<p>No habits recorded.</p>';
+            }
         }
     }
     
@@ -1122,7 +1206,20 @@ function createHabitElement(habit) {
         
         if (habit.completed) {
             gsap.from(el, { scale: 0.95, duration: 0.2, ease: "back.out(2)" });
-            addXP(10); // Per-task XP
+            
+            // Mood-aware XP: bonus on hard days
+            let xpAmount = 10;
+            if (state.todayMood === 'sad' || state.todayMood === 'rough') {
+                xpAmount = 15; // +5 bonus for pushing through
+            }
+            addXP(xpAmount);
+            
+            // Mood-aware message
+            if (state.todayMood && moodMessages[state.todayMood]) {
+                const msgs = moodMessages[state.todayMood].habit;
+                setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+            }
+            
             animateThreeClick();
         }
         
@@ -1573,6 +1670,50 @@ function sendNotification(title, body) {
     if ('Notification' in window && Notification.permission === 'granted') {
         new Notification(title, { body });
     }
+}
+
+// Mood Picker
+function setupMoodPicker() {
+    const moodBtns = document.querySelectorAll('.mood-btn');
+    moodBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const mood = btn.dataset.mood;
+            state.todayMood = mood;
+            saveState();
+            saveTodayToHistory();
+            
+            // Visual selection
+            moodBtns.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            gsap.from(btn, { scale: 0.7, duration: 0.3, ease: "back.out(2)" });
+            
+            // Mood-aware bunny message
+            if (moodMessages[mood]) {
+                const msgs = moodMessages[mood].start;
+                setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+            }
+            
+            // Bonus XP toast for rough/sad days
+            if (mood === 'sad' || mood === 'rough') {
+                addXP(5);
+                showToast("Thanks for sharing 💕 +5 XP bonus today!");
+            }
+            
+            if (typeof twemoji !== 'undefined') twemoji.parse(document.body);
+        });
+    });
+}
+
+function renderMoodSelection() {
+    if (!state.todayMood) return;
+    const moodBtns = document.querySelectorAll('.mood-btn');
+    moodBtns.forEach(btn => {
+        if (btn.dataset.mood === state.todayMood) {
+            btn.classList.add('selected');
+        } else {
+            btn.classList.remove('selected');
+        }
+    });
 }
 
 // 29. fireConfetti()

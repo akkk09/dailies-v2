@@ -1049,3 +1049,59 @@ body {
   font-weight: 800;
   color: var(--primary-dark);
 }
+
+/* Mood Picker */
+.mood-section {
+  background-color: var(--card-bg);
+  border-radius: 20px;
+  padding: 15px 20px;
+  border: 2px solid var(--border-color);
+  box-shadow: 0 6px 0 var(--shadow-color);
+  text-align: center;
+}
+
+.mood-label {
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.mood-picker {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mood-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid var(--border-color);
+  background-color: var(--bg-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mood-btn:hover {
+  transform: scale(1.15);
+  border-color: var(--primary);
+}
+
+.mood-btn.selected {
+  border-color: var(--primary-dark);
+  background-color: var(--primary);
+  transform: scale(1.2);
+  box-shadow: 0 4px 0 var(--shadow-color);
+}
+
+.mood-display {
+  display: inline-block;
+  font-size: 1.5rem;
+  margin-right: 8px;
+  vertical-align: middle;
+}
