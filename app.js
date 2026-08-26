@@ -639,7 +639,27 @@ function showToast(message) {
         gsap.to(toast, { y: -20, opacity: 0, duration: 0.3, onComplete: () => {
             toast.remove();
         }});
-    }, 2500);
+    }, 2000);
+}
+
+function showAlert(title, message, icon = '🥕') {
+    const modal = document.getElementById('alert-modal');
+    document.getElementById('alert-title').textContent = title;
+    document.getElementById('alert-message').textContent = message;
+    document.getElementById('alert-icon').textContent = icon;
+    
+    gsap.set(modal, { display: 'flex' });
+    gsap.to(modal, { autoAlpha: 1, duration: 0.3 });
+    gsap.fromTo(modal.querySelector('.modal-content'), { scale: 0.8 }, { scale: 1, duration: 0.3, ease: "back.out(1.5)" });
+    if (typeof twemoji !== 'undefined') twemoji.parse(modal);
+    
+    const closeBtn = document.getElementById('alert-close-btn');
+    closeBtn.onclick = () => {
+        gsap.to(modal.querySelector('.modal-content'), { scale: 0.8, duration: 0.2 });
+        gsap.to(modal, { autoAlpha: 0, duration: 0.2, delay: 0.1, onComplete: () => {
+            gsap.set(modal, { display: 'none' });
+        }});
+    };
 }
 
 // 13. checkNewDay() - FIXED for multi-day freezes
@@ -1570,6 +1590,52 @@ function setupEventListeners() {
     }
     
     // Shop Handlers
+    function handleShopPurchase(itemId, cost) {
+        if (state.ownedItems.includes(itemId)) {
+            // Toggle Equip logic
+            if (itemId.startsWith('theme_')) {
+                const themeName = itemId.replace('theme_', '');
+                if (state.activeTheme === themeName) {
+                    state.activeTheme = 'light';
+                    state.darkMode = false;
+                } else {
+                    state.activeTheme = themeName;
+                    state.darkMode = false;
+                }
+                saveState();
+                window.location.reload(); // Reload to apply theme cleanly
+                return;
+            }
+
+            if (state.equippedItems.includes(itemId)) {
+                state.equippedItems = state.equippedItems.filter(id => id !== itemId);
+            } else {
+                state.equippedItems.push(itemId);
+            }
+            updateAllShopButtons();
+            saveState();
+            renderAccessories();
+            showAlert("Nice!", "You changed your accessory! 🎀", "✨");
+            return;
+        }
+        
+        if (state.carrots >= cost) {
+            state.carrots -= cost;
+            state.ownedItems.push(itemId);
+            if (itemId === 'freeze') {
+                state.streakFreezes++;
+            }
+            updateAllShopButtons();
+            saveState();
+            renderCarrots();
+            renderFreezes();
+            showAlert("Yay!", "Purchase successful! 🎉", "🛒");
+            fireConfetti();
+        } else {
+            showAlert("Oops!", "Not enough carrots! Keep completing habits to earn more! 🥕", "🥺");
+        }
+    }
+
     const setupShopBtn = (btnId, itemId, cost) => {
         const btn = document.getElementById(btnId);
         if (!btn) return;
@@ -1591,11 +1657,11 @@ function setupEventListeners() {
                 saveState();
                 renderCarrots();
                 renderFreezes();
-                showToast("Bought Streak Freeze! ❄️");
+                showAlert("Yay!", "Bought Streak Freeze! ❄️", "🧊");
                 gsap.from(DOM.freezeDisplay, { scale: 1.5, duration: 0.3, ease: "back.out(2)" });
             } else {
                 gsap.to(DOM.buyFreezeBtn, { x: 5, duration: 0.1, yoyo: true, repeat: 3 });
-                showToast("Not enough 🥕!");
+                showAlert("Oops!", "Not enough carrots! Keep completing habits to earn more! 🥕", "🥺");
             }
         });
     }
