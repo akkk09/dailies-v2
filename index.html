@@ -317,12 +317,22 @@
         <div class="modal-content">
             <h2>Add New Habit 🌸</h2>
             <input type="text" id="new-habit-input" placeholder="Drink 8 glasses of water...">
-            <div class="category-picker" id="category-picker">
-                <label>Category:</label>
-                <button class="cat-btn" data-cat="health">💚 Health</button>
-                <button class="cat-btn" data-cat="study">📚 Study</button>
-                <button class="cat-btn" data-cat="selfcare">🧴 Self-care</button>
-                <button class="cat-btn active" data-cat="other">🌸 Other</button>
+            <div class="emoji-picker-container" style="margin-top: 15px;">
+                <label style="font-size: 0.9rem; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 8px;">Choose an icon:</label>
+                <div class="emoji-grid" id="emoji-picker" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+                    <button class="emoji-btn active" data-emoji="🌸">🌸</button>
+                    <button class="emoji-btn" data-emoji="💧">💧</button>
+                    <button class="emoji-btn" data-emoji="📚">📚</button>
+                    <button class="emoji-btn" data-emoji="🏃">🏃</button>
+                    <button class="emoji-btn" data-emoji="🧘‍♀️">🧘‍♀️</button>
+                    <button class="emoji-btn" data-emoji="🎨">🎨</button>
+                    <button class="emoji-btn" data-emoji="💻">💻</button>
+                    <button class="emoji-btn" data-emoji="✨">✨</button>
+                    <button class="emoji-btn" data-emoji="💊">💊</button>
+                    <button class="emoji-btn" data-emoji="🧹">🧹</button>
+                    <button class="emoji-btn" data-emoji="😴">😴</button>
+                    <button class="emoji-btn" data-emoji="🌞">🌞</button>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="cancel-btn" id="cancel-btn">Cancel</button>

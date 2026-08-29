@@ -817,20 +817,6 @@ button, input, .habit-item, .heatmap-cell, .nav-btn, .icon-btn {
   color: white;
 }
 
-.cat-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 6px;
-  flex-shrink: 0;
-}
-
-.cat-dot.health { background-color: #4caf50; }
-.cat-dot.study { background-color: #2196f3; }
-.cat-dot.selfcare { background-color: #e91e63; }
-.cat-dot.other { background-color: #ff9800; }
-
 .habit-info {
   display: flex;
   align-items: center;
@@ -917,6 +903,10 @@ button, input, .habit-item, .heatmap-cell, .nav-btn, .icon-btn {
   gap: 8px;
   align-items: center;
   flex-wrap: wrap;
+.category-picker, .emoji-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .category-picker label {
@@ -930,12 +920,11 @@ button, input, .habit-item, .heatmap-cell, .nav-btn, .icon-btn {
 .cat-btn {
   background-color: var(--bg-color);
   border: 2px solid var(--border-color);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  padding: 8px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: bold;
-  color: var(--text-main);
+  color: var(--text-muted);
   transition: all 0.2s;
 }
 
@@ -943,6 +932,26 @@ button, input, .habit-item, .heatmap-cell, .nav-btn, .icon-btn {
   background-color: var(--primary);
   color: white;
   border-color: var(--primary-dark);
+}
+
+.emoji-btn {
+  background-color: var(--bg-color);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 1.2rem;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-btn.active {
+  background-color: var(--primary);
+  border-color: var(--primary-dark);
+  transform: scale(1.1);
+  box-shadow: 0 4px 0 var(--shadow-color);
 }
 
 .modal {

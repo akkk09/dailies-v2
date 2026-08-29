@@ -80,8 +80,65 @@ const DOM = {
     milestoneDesc: document.getElementById('milestone-desc'),
     milestoneCloseBtn: document.getElementById('milestone-close-btn'),
     
-    categoryBtns: document.querySelectorAll('.cat-btn')
+    emojiBtns: document.querySelectorAll('.emoji-btn')
 };
+
+// 2.5 Sound Effects
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    const now = audioCtx.currentTime;
+    
+    if (type === 'pop') {
+        // High, quick drop (like checking a habit)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+    } else if (type === 'coin') {
+        // Double ding (cha-ching)
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(900, now);
+        osc.frequency.setValueAtTime(1200, now + 0.1);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
+        gain.gain.linearRampToValueAtTime(0, now + 0.1);
+        gain.gain.linearRampToValueAtTime(0.1, now + 0.12);
+        gain.gain.linearRampToValueAtTime(0, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+    } else if (type === 'chime') {
+        // Level up / Pomodoro complete
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);     // A4
+        osc.frequency.setValueAtTime(554.37, now + 0.1); // C#5
+        osc.frequency.setValueAtTime(659.25, now + 0.2); // E5
+        osc.frequency.setValueAtTime(880, now + 0.3); // A5
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+        gain.gain.linearRampToValueAtTime(0.2, now + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+        osc.start(now);
+        osc.stop(now + 1.5);
+    } else if (type === 'error') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.setValueAtTime(150, now + 0.15);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.1, now + 0.05);
+        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    }
+}
 
 // 3. State Object
 let defaultState = {
@@ -768,6 +825,7 @@ function startPomo() {
         } else {
             clearInterval(pomo.timerId);
             pomo.isRunning = false;
+            playSound('chime');
             if (pomo.mode === 'focus') {
                 state.focusSessions++;
                 saveState();
@@ -1106,7 +1164,13 @@ function addXP(amount) {
     
     if (state.level > oldLevel) {
         // Level up!
-        showMilestoneModal('🎉', `Level ${state.level}!`, `You're now a ${LEVELS[state.level - 1].name}!`);
+        const levelDiff = state.level - oldLevel;
+        const carrotReward = levelDiff * 50;
+        state.carrots += carrotReward;
+        renderCarrots();
+        saveState();
+        playSound('chime');
+        showMilestoneModal('🎉', `Level ${state.level}!`, `You're now a ${LEVELS[state.level - 1].name}!\nYou earned ${carrotReward} carrots! 🥕`);
         fireConfetti(true);
     }
 }
@@ -1249,10 +1313,18 @@ function createHabitElement(habit) {
     el.className = `habit-item ${habit.completed ? 'completed' : ''}`;
     el.dataset.id = habit.id;
 
+    const legacyEmojiMap = {
+        'health': '💚',
+        'study': '📚',
+        'selfcare': '🧴',
+        'other': '🌸'
+    };
+    const habitEmoji = habit.emoji || legacyEmojiMap[habit.category] || '🌸';
+
     el.innerHTML = `
         <div class="habit-info">
             <span class="drag-handle" style="cursor: grab; padding-right: 10px; color: var(--text-muted); font-size: 1.2rem;">⠿</span>
-            <span class="cat-dot ${habit.category || 'other'}"></span>
+            <span class="habit-emoji" style="font-size: 1.2rem; margin-right: 8px;">${habitEmoji}</span>
             <div class="check-circle"></div>
             <span class="habit-name">${habit.name}</span>
         </div>
@@ -1267,6 +1339,7 @@ function createHabitElement(habit) {
         el.classList.toggle('completed');
         
         if (habit.completed) {
+            playSound('pop');
             gsap.from(el, { scale: 0.95, duration: 0.2, ease: "back.out(2)" });
             
             // Mood-aware XP: bonus on hard days
@@ -1389,14 +1462,14 @@ function setupEventListeners() {
         });
     }
     
-    // Category Picker in Add Modal
-    let selectedCategory = 'other';
-    if (DOM.categoryBtns) {
-        DOM.categoryBtns.forEach(btn => {
+    // Emoji Picker in Add Modal
+    let selectedEmoji = '🌸';
+    if (DOM.emojiBtns) {
+        DOM.emojiBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                DOM.categoryBtns.forEach(b => b.classList.remove('active'));
+                DOM.emojiBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                selectedCategory = btn.dataset.cat;
+                selectedEmoji = btn.dataset.emoji;
             });
         });
     }
@@ -1405,11 +1478,11 @@ function setupEventListeners() {
     if (DOM.addHabitBtn) {
         DOM.addHabitBtn.addEventListener('click', () => {
             if (DOM.newHabitInput) DOM.newHabitInput.value = '';
-            selectedCategory = 'other';
-            if (DOM.categoryBtns) {
-                DOM.categoryBtns.forEach(b => b.classList.remove('active'));
-                const otherBtn = Array.from(DOM.categoryBtns).find(b => b.dataset.cat === 'other');
-                if (otherBtn) otherBtn.classList.add('active');
+            selectedEmoji = '🌸';
+            if (DOM.emojiBtns) {
+                DOM.emojiBtns.forEach(b => b.classList.remove('active'));
+                const defaultBtn = Array.from(DOM.emojiBtns).find(b => b.dataset.emoji === '🌸');
+                if (defaultBtn) defaultBtn.classList.add('active');
             }
             gsap.set(DOM.addModal, { display: 'flex' });
             gsap.to(DOM.addModal, { autoAlpha: 1, duration: 0.2 });
@@ -1436,7 +1509,7 @@ function setupEventListeners() {
                         id: Date.now().toString(),
                         name: name,
                         completed: false,
-                        category: selectedCategory
+                        emoji: selectedEmoji
                     };
                     state.habits.push(newHabit);
                     saveState();
@@ -1616,9 +1689,11 @@ function setupEventListeners() {
             saveState();
             renderCarrots();
             renderFreezes();
+            playSound('coin');
             showAlert("Yay!", "Purchase successful! 🎉", "🛒");
             fireConfetti();
         } else {
+            playSound('error');
             showAlert("Oops!", "Not enough carrots! Keep completing habits to earn more! 🥕", "🥺");
         }
     }
@@ -1644,9 +1719,11 @@ function setupEventListeners() {
                 saveState();
                 renderCarrots();
                 renderFreezes();
+                playSound('coin');
                 showAlert("Yay!", "Bought Streak Freeze! ❄️", "🧊");
                 gsap.from(DOM.freezeDisplay, { scale: 1.5, duration: 0.3, ease: "back.out(2)" });
             } else {
+                playSound('error');
                 gsap.to(DOM.buyFreezeBtn, { x: 5, duration: 0.1, yoyo: true, repeat: 3 });
                 showAlert("Oops!", "Not enough carrots! Keep completing habits to earn more! 🥕", "🥺");
             }
@@ -1906,6 +1983,9 @@ function fireConfetti(big = false) {
 function renderCarrots() {
     if (DOM.carrotCount) {
         DOM.carrotCount.textContent = state.carrots;
+    }
+    if (DOM.shopCarrotDisplay) {
+        DOM.shopCarrotDisplay.textContent = state.carrots;
     }
 }
 
