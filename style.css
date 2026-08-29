@@ -79,6 +79,7 @@
   margin: 0;
   padding: 0;
   font-family: 'Nunito', sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::-webkit-scrollbar {
@@ -100,6 +101,12 @@ body {
   justify-content: center;
   min-height: 100vh;
   padding: 20px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button, input, .habit-item, .heatmap-cell, .nav-btn, .icon-btn {
+  touch-action: manipulation;
 }
 
 .app-container {
